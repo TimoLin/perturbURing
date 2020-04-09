@@ -71,30 +71,30 @@ int main(int argc, char *argv[])
         //const scalar Retau = 300;
         //const scalar d = 7.54/(2000.0);
         const scalar Retau = 4384;
-        const scalar outerd = 0.052;
-        const scalar innerd = 0.027;
+        const scalar outerd = 0.0182;
+        const scalar innerd = 0.0077;
         const scalar d=outerd-innerd;
 
         IOdictionary transportProperties
         (
-             IOobject
-             (
-              "transportProperties",
-              runTime.constant(),
-              mesh,
-              IOobject::MUST_READ,
-              IOobject::NO_WRITE
-             )
+            IOobject
+            (
+                "transportProperties",
+                runTime.constant(),
+                mesh,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
         );
         dimensionedScalar nu
         (
-             transportProperties.lookup("nu")
+            transportProperties.lookup("nu")
         );
         dimensionedVector Ubar
         (
-             transportProperties.lookup("Ubar")
+            transportProperties.lookup("Ubar")
         );
-
+  
         const scalar utau = Retau*nu.value()/d;
         //wall normal circulation
         const scalar duplus = Ubar.value()[0]*0.5/utau;
@@ -105,50 +105,55 @@ int main(int argc, char *argv[])
         //streamwise wave number: spacing x+ = 500
         const scalar alphaPlus = 2.0*constant::mathematical::pi*(1.0/800.0);
         const scalar epsilon = Ubar.value()[0]/20.0;
+        Random perturbation(1234567);
 
         forAll(centers, celli)
         {
+            scalar deviation=1.0 + 0.2*perturbation.GaussNormal();
+
             scalar& Ux(U[celli].x());
             vector cCenter = centers[celli];
-            scalar r = ::sqrt(::sqr(cCenter.y()) + ::sqr(cCenter.z()));
-            r=r-innerd/2;
+            scalar rr = ::sqrt(::sqr(cCenter.y()) + ::sqr(cCenter.z()));
+            scalar r=rr;//-innerd/2;
             scalar ringr=mag(r-(outerd+innerd)/4);
-            Ux = 1.218*mag(Ubar.value())*std::pow(max((1-2*ringr/1.01/d),SMA    LL),0.142857);
+            Ux = 1.218*mag(Ubar.value())*std::pow(max((1-2*ringr/1.01/d),SMALL),0.142857);
             //Ux = 2*mag(Ubar.value())*(1-::sqr(r/d));
-            scalar y = d - r;
-            r = r*Retau/d;
+            scalar y = d/2 - ringr;
+            r = rr*Retau/d;
             y = y*Retau/d;
-
+ 
             scalar theta = ::atan(cCenter.y()/cCenter.z());
             scalar x = cCenter.x()*Retau/d;
-
-
+ 
             Ux = Ux + (utau*duplus/2.0)
-                *::cos(betaPlus*theta*r) *(y/30)
-                *::exp(-sigma*::sqr(y) + 0.5);
+                    *::cos(betaPlus*theta*r) *(y/30)
+                    *::exp(-sigma*::sqr(y) + 0.5);
+            //Ux = Ux*deviation;
+            //Info<<"This is ux:"<<utau<<"\t"<<duplus<<"\t"
+            //<<betaPlus<<"\t"<<r<<"\t"<<d-ringr<<" "<<sigma<<endl;
             scalar utheta = epsilon*::sin(alphaPlus*x)*y
-                *::exp(-sigma*::sqr(y));
+                            *::exp(-sigma*::sqr(y))*100;
             vector tangential
-                (
+            (
                  0, cCenter.y(), cCenter.z()
-                );
+            );
             tangential = tangential ^ vector(1,0,0);
             tangential = tangential/mag(tangential);
-
+ 
             U[celli] = U[celli] + utheta*tangential;
-
+ 
         }
-
+ 
         U.write();
     }
     else
     {
-        Info<< "    No U" << endl;
+         Info<< "    No U" << endl;
     }
-
+ 
     Info<< endl;
-
-
+ 
+ 
     return(0);
 }
 
