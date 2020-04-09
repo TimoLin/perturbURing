@@ -69,7 +69,6 @@ int main(int argc, char *argv[])
         Info<< "    Reading U" << endl;
         volVectorField U(Uheader, mesh);
         const scalar Retau = 300;
-        const scalar d = 7.54/(2000.0);
 
         IOdictionary transportProperties
         (
@@ -90,7 +89,13 @@ int main(int argc, char *argv[])
         (
             transportProperties.lookup("Ubar")
         );
+        dimensionedVector d
+        (
+            transportProperties.lookup("d")
+        );
 
+        // convert d to half height and mm to m
+        d = d/2000;
         const scalar utau = Retau*nu.value()/d;
         //wall normal circulation
         const scalar duplus = Ubar.value()[0]*0.5/utau;
