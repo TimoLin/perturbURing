@@ -89,13 +89,13 @@ int main(int argc, char *argv[])
         (
             transportProperties.lookup("Ubar")
         );
-        dimensionedVector d
+        dimensionedScalar diameter
         (
             transportProperties.lookup("d")
         );
 
         // convert d to half height and mm to m
-        d = d/2000;
+        scalar d = diameter.value()/2000;
         const scalar utau = Retau*nu.value()/d;
         //wall normal circulation
         const scalar duplus = Ubar.value()[0]*0.5/utau;
