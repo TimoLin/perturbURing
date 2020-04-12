@@ -94,8 +94,8 @@ int main(int argc, char *argv[])
             transportProperties.lookup("d")
         );
 
-        // convert d to half height and mm to m
-        scalar d = diameter.value()/2000;
+        // Pipe half height/radius
+        scalar d = diameter.value()/2;
         const scalar utau = Retau*nu.value()/d;
         //wall normal circulation
         const scalar duplus = Ubar.value()[0]*0.5/utau;
@@ -113,6 +113,8 @@ int main(int argc, char *argv[])
             vector cCenter = centers[celli];
             scalar r = ::sqrt(::sqr(cCenter.y()) + ::sqr(cCenter.z()));
             Ux = 2*mag(Ubar.value())*(1-::sqr(r/d));
+            //Ux = 1.2*mag(Ubar.value())*::pow((1-(r/d)),1.0/7.0);
+
             scalar y = d - r;
             r = r*Retau/d;
             y = y*Retau/d;
@@ -126,7 +128,7 @@ int main(int argc, char *argv[])
                  *::exp(-sigma*::sqr(y) + 0.5);
             scalar utheta = epsilon*::sin(alphaPlus*x)*y
                             *::exp(-sigma*::sqr(y));
-
+            //Info<<utau*duplus/2.0<<"\t"<<y<<endl;
             vector tangential
             (
                 0, cCenter.y(), cCenter.z()
