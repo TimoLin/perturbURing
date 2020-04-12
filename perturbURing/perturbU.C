@@ -99,8 +99,8 @@ int main(int argc, char *argv[])
         );
         
         // Circle ring half height
-        const scalar dOuter = diameterOuter.value()/1000;
-        const scalar dInner = diameterInner.value()/1000;
+        const scalar dOuter = diameterOuter.value();
+        const scalar dInner = diameterInner.value();
         const scalar d = (dOuter-dInner)/2;
         const scalar utau = Retau*nu.value()/d;
         //wall normal circulation
@@ -120,8 +120,6 @@ int main(int argc, char *argv[])
             scalar& Ux(U[celli].x());
             vector cCenter = centers[celli];
             scalar r = ::sqrt(::sqr(cCenter.y()) + ::sqr(cCenter.z()));
-            //scalar r=rr;//-innerd/2;
-            //scalar ringr=mag(r-(outerd+innerd)/4);
             scalar rHalf = mag(r-(dOuter+dInner)/4);
 
             // Laminar parabolic profile
